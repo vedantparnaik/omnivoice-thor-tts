@@ -8,6 +8,31 @@ streaming web playground with live edge telemetry.
 Target device: **NVIDIA Jetson AGX Thor** (JetPack R38 / CUDA 13 / TensorRT 10.13,
 122 GB unified memory, Blackwell-class GPU, sm_110).
 
+## Highlights
+
+- **End-to-end TensorRT** — backbone (FP32 / FP16 / BF16 / INT8) **and** vocoder,
+  exported to ONNX and compiled with dynamic profiles + layer fusion.
+- **Native runtime** — Python `tensorrt` + a C++ `NvInfer.h` runner, both using
+  CUDA streams, zero-copy input binding and pinned host memory (`cudaHostAlloc`).
+- **Streaming pipeline** — multi-threaded producer/consumer with sentence
+  chunking for low time-to-first-audio.
+- **Web playground** — streaming audio + live TTFA / RTF / VRAM / GPU telemetry.
+- **Measured on device** — overall **RTF 0.169** (target < 0.5), **TTFA 553 ms**.
+
+## Documentation
+
+| Doc | What's in it |
+|-----|--------------|
+| [`SUBMISSION.md`](SUBMISSION.md) | Requirement-by-requirement mapping of the assignment to delivered work, with measured metrics |
+| [`docs/STAGE1.md`](docs/STAGE1.md) | Checkpoint: PyTorch baseline + streaming playground + TensorRT vocoder |
+| [`docs/STAGE2.md`](docs/STAGE2.md) | Checkpoint: full TensorRT pipeline (backbone + vocoder) |
+| This `README` | Setup/run, architecture, results, and platform findings (below) |
+
+> **Status:** all functional, architecture, UI and performance requirements met.
+> One caveat: the vocoder runs in FP32 — its FP16 build is blocked by an
+> NVIDIA-acknowledged Blackwell compiler bug (details in the *Precision* section
+> below and in `SUBMISSION.md`). It does not affect the RTF target.
+
 ---
 
 ## Results (measured on this device)
@@ -32,8 +57,10 @@ Per-stage detail:
   is **~1.8x** faster than torch FP16 in BF16 (e.g. 91 ms -> 49 ms at S=512),
   rel-RMS ~0.004, with coherent audio matching the baseline.
 
-Artifacts: `artifacts/baseline*.json`, `artifacts/*.plan`, `artifacts/*.wav`,
-`artifacts/trt_build_report.json`, `artifacts/trt_backbone_build_report.json`.
+Build reports checked into the repo: `artifacts/trt_build_report.json`,
+`artifacts/trt_backbone_build_report.json`, `artifacts/baseline*.json`. The
+engines (`*.plan`), ONNX weights and sample audio (`*.wav`) are generated locally
+by the `scripts/` (excluded from git due to size — see `.gitignore`).
 
 ---
 
