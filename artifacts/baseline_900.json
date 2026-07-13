@@ -1,0 +1,46 @@
+{
+  "backend": "pytorch-fp16",
+  "load_s": 6.21,
+  "num_step": 32,
+  "sampling_rate": 24000,
+  "cases": {
+    "short": {
+      "words": 5,
+      "ttfa_ms": 906.6,
+      "overall_rtf": 0.445,
+      "total_wall_s": 0.907,
+      "total_audio_s": 2.04,
+      "peak_vram_mb": 2076.7,
+      "n_chunks": 1,
+      "per_chunk_rtf": [
+        0.444
+      ]
+    },
+    "medium": {
+      "words": 21,
+      "ttfa_ms": 1275.7,
+      "overall_rtf": 0.358,
+      "total_wall_s": 2.286,
+      "total_audio_s": 6.38,
+      "peak_vram_mb": 2118.4,
+      "n_chunks": 2,
+      "per_chunk_rtf": [
+        0.31,
+        0.445
+      ]
+    },
+    "long": {
+      "words": 51,
+      "ttfa_ms": 1639.5,
+      "overall_rtf": 0.236,
+      "total_wall_s": 4.271,
+      "total_audio_s": 18.13,
+      "peak_vram_mb": 2249.2,
+      "n_chunks": 2,
+      "per_chunk_rtf": [
+        0.269,
+        0.219
+      ]
+    }
+  }
+}

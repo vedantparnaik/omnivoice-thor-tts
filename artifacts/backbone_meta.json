@@ -1,0 +1,7 @@
+{
+  "num_audio_codebook": 8,
+  "audio_vocab_size": 1025,
+  "hidden_size": 1024,
+  "llm_model_type": "qwen3",
+  "batch_2b": 2
+}

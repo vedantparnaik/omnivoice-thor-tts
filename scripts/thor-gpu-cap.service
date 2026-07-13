@@ -1,0 +1,14 @@
+[Unit]
+Description=Cap Thor GPU compute clock for stability (OmniVoice edge TTS)
+After=nvpmodel.service
+DefaultDependencies=no
+Before=multi-user.target
+
+[Service]
+Type=oneshot
+# Cap the GPU compute cluster; the top of the range is unstable on this board.
+ExecStart=/bin/bash -c 'echo 900000000 > /sys/class/devfreq/gpu-gpc-0/max_freq'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

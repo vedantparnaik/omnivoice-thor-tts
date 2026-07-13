@@ -1,0 +1,14 @@
+{
+  "component": "backbone",
+  "precision": "int8",
+  "engine_mb": 783.9,
+  "build_s": 65.7,
+  "network_layers": 8880,
+  "engine_layers": 539,
+  "profile": {
+    "min": 32,
+    "opt": 384,
+    "max": 1200,
+    "batch": 2
+  }
+}

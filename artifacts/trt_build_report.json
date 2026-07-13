@@ -1,0 +1,13 @@
+{
+  "precision": "fp32",
+  "engine_mb": 101.1,
+  "build_s": 115.2,
+  "network_layers": 916,
+  "engine_layers": 102,
+  "profile": {
+    "min": 8,
+    "opt": 200,
+    "max": 1000,
+    "num_quantizers": 8
+  }
+}

@@ -1,0 +1,54 @@
+# OmniVoice real-time TTS on NVIDIA Jetson AGX Thor — Python dependencies.
+#
+# Target platform: Jetson AGX Thor, JetPack R38 (CUDA 13, Python 3.12, aarch64/sbsa).
+#
+# IMPORTANT — two dependency groups are NOT plain PyPI packages on Jetson:
+#   1. torch / torchaudio and the NVIDIA math libs come from the NVIDIA Jetson
+#      index (the --extra-index-url below); the exact aarch64/cu130 wheels are
+#      pinned by URL.
+#   2. tensorrt (10.13.3.9), CUDA and cuDNN ship with JetPack in the system
+#      site-packages. `scripts/env.sh` adds them to PYTHONPATH / LD_LIBRARY_PATH.
+#      Do NOT `pip install tensorrt` on Jetson — use the JetPack build.
+#
+# For a byte-exact snapshot of the working environment, see requirements-freeze.txt.
+
+--extra-index-url https://pypi.jetson-ai-lab.io/sbsa/cu130/
+
+# --- Core model + ML stack ---
+torch @ https://pypi.jetson-ai-lab.io/sbsa/cu130/+f/e65/21b6628938478/torch-2.9.1-cp312-cp312-linux_aarch64.whl#sha256=e6521b662893847896ece6740a6f3bd996c8a067d7b3334aadd6e3dcef47fd64
+torchaudio @ https://pypi.jetson-ai-lab.io/sbsa/cu130/+f/da9/b4df0a43fcda7/torchaudio-2.9.1-cp312-cp312-linux_aarch64.whl#sha256=da9b4df0a43fcda72d45ec546146a5340de4d0a0aad4c13a2fe4ef0809903907
+omnivoice==0.1.5
+transformers==5.12.1
+tokenizers==0.22.2
+safetensors==0.8.0
+accelerate==1.14.0
+huggingface_hub==1.21.0
+hf-xet==1.5.1
+
+# --- NVIDIA math libs the Jetson torch wheel dynamically links against ---
+nvidia-cublas==13.6.0.2
+nvidia-cuda-nvrtc==13.3.33
+nvidia-cudss-cu13==0.8.0.10
+nvpl==26.5
+
+# --- Audio / numerics ---
+numpy==1.26.4
+scipy==1.17.1
+librosa==0.11.0
+soundfile==0.14.0
+soxr==1.1.0
+numba==0.65.1
+
+# --- ONNX export + TensorRT engine build ---
+onnx==1.22.0
+onnxscript==0.7.1
+onnx-ir==0.2.1
+
+# --- Web playground (streaming API + telemetry) ---
+fastapi==0.139.0
+uvicorn==0.49.0
+websockets==16.0
+python-multipart==0.0.32
+
+# --- Misc ---
+tqdm==4.68.3

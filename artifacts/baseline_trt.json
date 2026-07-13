@@ -1,0 +1,46 @@
+{
+  "backend": "pytorch+trt-vocoder(vocoder_fp32.plan)",
+  "load_s": 6.37,
+  "num_step": 32,
+  "sampling_rate": 24000,
+  "cases": {
+    "short": {
+      "words": 5,
+      "ttfa_ms": 767.8,
+      "overall_rtf": 0.376,
+      "total_wall_s": 0.768,
+      "total_audio_s": 2.04,
+      "peak_vram_mb": 2061.1,
+      "n_chunks": 1,
+      "per_chunk_rtf": [
+        0.376
+      ]
+    },
+    "medium": {
+      "words": 21,
+      "ttfa_ms": 1064.3,
+      "overall_rtf": 0.281,
+      "total_wall_s": 1.92,
+      "total_audio_s": 6.84,
+      "peak_vram_mb": 2086.7,
+      "n_chunks": 2,
+      "per_chunk_rtf": [
+        0.241,
+        0.352
+      ]
+    },
+    "long": {
+      "words": 51,
+      "ttfa_ms": 1385.3,
+      "overall_rtf": 0.19,
+      "total_wall_s": 3.571,
+      "total_audio_s": 18.76,
+      "peak_vram_mb": 2160.3,
+      "n_chunks": 2,
+      "per_chunk_rtf": [
+        0.206,
+        0.181
+      ]
+    }
+  }
+}

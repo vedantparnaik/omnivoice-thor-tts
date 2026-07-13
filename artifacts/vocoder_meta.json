@@ -1,0 +1,8 @@
+{
+  "num_quantizers": 8,
+  "codebook_size": 1024,
+  "frame_rate": 25.0,
+  "hop_length": 960,
+  "sampling_rate": 24000,
+  "samples_per_token": 960
+}

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OmniVoice · Jetson Thor TTS Playground</title>
+<style>
+  :root{
+    --bg:#0b0f17; --panel:#131a27; --panel2:#0f1521; --line:#222d40;
+    --txt:#e6edf6; --mut:#8ca0bd; --acc:#4da3ff; --ok:#37d39b; --warn:#ffb454; --bad:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--txt)}
+  header{padding:18px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px}
+  header h1{font-size:18px;margin:0;font-weight:650}
+  .pill{font-size:12px;color:var(--mut);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+  .pill b{color:var(--acc)}
+  .wrap{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px;padding:18px 24px;max-width:1400px;margin:0 auto}
+  @media(max-width:980px){.wrap{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .card h2{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);margin:0 0 12px}
+  textarea{width:100%;min-height:110px;resize:vertical;background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:14px;line-height:1.5}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+  .fld{display:flex;flex-direction:column;gap:6px}
+  .fld label{font-size:12px;color:var(--mut);display:flex;justify-content:space-between}
+  .fld label b{color:var(--txt);font-weight:600}
+  input[type=range]{width:100%}
+  input[type=text],input[type=number],select{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:13px}
+  .row{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap}
+  button{background:var(--acc);color:#04101f;border:0;border-radius:10px;padding:11px 18px;font-size:14px;font-weight:650;cursor:pointer}
+  button.ghost{background:transparent;color:var(--txt);border:1px solid var(--line)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .metric{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px}
+  .metric .k{font-size:11px;color:var(--mut)}
+  .metric .v{font-size:22px;font-weight:700;margin-top:2px}
+  .metric .u{font-size:11px;color:var(--mut)}
+  .good{color:var(--ok)} .badv{color:var(--bad)} .warnv{color:var(--warn)}
+  table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+  th{color:var(--mut);font-weight:600}
+  .tele{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .spark{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px}
+  .spark .k{font-size:11px;color:var(--mut);display:flex;justify-content:space-between}
+  .spark .v{font-size:16px;font-weight:700}
+  canvas{width:100%;height:46px;display:block;margin-top:6px}
+  .status{font-size:12px;color:var(--mut)}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bad);margin-right:6px}
+  .dot.on{background:var(--ok)}
+  .log{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--mut);white-space:pre-wrap;max-height:120px;overflow:auto;margin-top:8px}
+</style>
+</head>
+<body>
+<header>
+  <h1>OmniVoice · Jetson Thor TTS Playground</h1>
+  <span class="pill">backend <b id="beBadge">…</b></span>
+  <span class="pill">sr <b id="srBadge">–</b> Hz</span>
+  <span class="pill" style="margin-left:auto"><span class="dot" id="teleDot"></span><span class="status" id="teleStat">telemetry</span></span>
+</header>
+
+<div class="wrap">
+  <!-- LEFT: controls + audio + request metrics -->
+  <div class="card">
+    <h2>Prompt</h2>
+    <textarea id="text">Hello from the Jetson Thor. This is a real-time, zero-shot text to speech pipeline. It streams audio chunk by chunk while measuring latency on the edge.</textarea>
+
+    <div class="grid">
+      <div class="fld">
+        <label>Language <b id="langV"></b></label>
+        <input type="text" id="language" value="English" />
+      </div>
+      <div class="fld">
+        <label>Voice design (instruct, optional)</label>
+        <input type="text" id="instruct" placeholder="e.g. female, calm, british accent" />
+      </div>
+      <div class="fld">
+        <label>Diffusion steps <b id="stepV">32</b></label>
+        <input type="range" id="num_step" min="4" max="64" step="1" value="32" />
+      </div>
+      <div class="fld">
+        <label>Guidance scale <b id="gsV">2.0</b></label>
+        <input type="range" id="guidance_scale" min="1" max="5" step="0.1" value="2.0" />
+      </div>
+      <div class="fld">
+        <label>Position temperature <b id="ptV">5.0</b></label>
+        <input type="range" id="position_temperature" min="0" max="10" step="0.1" value="5.0" />
+      </div>
+      <div class="fld">
+        <label>Class temperature <b id="ctV">0.0</b></label>
+        <input type="range" id="class_temperature" min="0" max="2" step="0.05" value="0.0" />
+      </div>
+      <div class="fld">
+        <label>First-chunk words (TTFA) <b id="fcV">12</b></label>
+        <input type="range" id="first_chunk_words" min="3" max="50" step="1" value="12" />
+      </div>
+      <div class="fld">
+        <label>Max words / chunk <b id="mwV">50</b></label>
+        <input type="range" id="max_words" min="5" max="80" step="1" value="50" />
+      </div>
+      <div class="fld">
+        <label>Seed (optional)</label>
+        <input type="number" id="seed" placeholder="random" />
+      </div>
+    </div>
+
+    <div class="row">
+      <button id="go">▶ Generate &amp; Stream</button>
+      <button id="stop" class="ghost" disabled>■ Stop</button>
+      <span class="status" id="status">idle</span>
+    </div>
+
+    <h2 style="margin-top:20px">Request metrics</h2>
+    <div class="metrics">
+      <div class="metric"><div class="k">Time to first audio</div><div class="v" id="mTtfa">–</div><div class="u">ms</div></div>
+      <div class="metric"><div class="k">Overall RTF</div><div class="v" id="mRtf">–</div><div class="u">&lt; 0.5 target</div></div>
+      <div class="metric"><div class="k">Audio generated</div><div class="v" id="mAudio">–</div><div class="u">seconds</div></div>
+      <div class="metric"><div class="k">Peak VRAM</div><div class="v" id="mVram">–</div><div class="u">MB (alloc)</div></div>
+    </div>
+
+    <table id="chunkTbl">
+      <thead><tr><th>#</th><th>chunk text</th><th>gen (s)</th><th>audio (s)</th><th>RTF</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="log" id="log"></div>
+  </div>
+
+  <!-- RIGHT: live telemetry -->
+  <div class="card">
+    <h2>Live Jetson telemetry</h2>
+    <div class="tele">
+      <div class="spark"><div class="k"><span>Unified memory</span><span class="v" id="tRam">–</span></div><canvas id="cRam"></canvas></div>
+      <div class="spark"><div class="k"><span>GPU util</span><span class="v" id="tUtil">–</span></div><canvas id="cUtil"></canvas></div>
+      <div class="spark"><div class="k"><span>GPU power</span><span class="v" id="tGpuP">–</span></div><canvas id="cGpuP"></canvas></div>
+      <div class="spark"><div class="k"><span>Board power (VIN)</span><span class="v" id="tVin">–</span></div><canvas id="cVin"></canvas></div>
+      <div class="spark"><div class="k"><span>GPU temp</span><span class="v" id="tGpuT">–</span></div><canvas id="cGpuT"></canvas></div>
+      <div class="spark"><div class="k"><span>CPU temp</span><span class="v" id="tCpuT">–</span></div><canvas id="cCpuT"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
